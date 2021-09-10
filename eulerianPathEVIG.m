@@ -32,13 +32,13 @@ s2 = sum(A);
 d = s2(1);
 n = size(A,2);
 
-c_pairs = zeros(5,n);
+c_pairs = zeros(d+1,n);
 path = zeros(2,d*n/2);
 path(1,1) = start;
 
 if log
-logname = "eulerianPathEVIG_log.txt";
-fid = fopen(logname,'w');
+    logname = "eulerianPathEVIG_log.txt";
+    fid = fopen(logname,'w');
 end
 
 i = 1;
@@ -48,10 +48,10 @@ temp = [];
 ll = d*n/2;
 
 if log
-writematrix(A,'A.txt','Delimiter','tab')
-fprintf(fid,"A =\n"); filetext = fileread('A.txt');
-fprintf(fid,filetext);
-end 
+    writematrix(A,'A.txt','Delimiter','tab')
+    fprintf(fid,"A =\n"); filetext = fileread('A.txt');
+    fprintf(fid,filetext);
+end
 
 % try
 %     figure()
@@ -61,8 +61,8 @@ while i < ll+1
     % Find connected codebit vertex
     v = find(A(:,path(1,i)));
     if log
-    fprintf(fid,"i = %d\tll = %d\t",i,ll);  
-    fprintf(fid,"v="+mat2str(v)+'\n');
+        fprintf(fid,"i = %d\tll = %d\t",i,ll);
+        fprintf(fid,"v="+mat2str(v)+'\n');
     end
     if isempty(v)
         path(:,i:n*d/2)=0;
@@ -70,16 +70,16 @@ while i < ll+1
         i = i+size(temp,2);
         
         if log
-        fprintf(fid,"v is empty, enter loop %d\n",loop);
-        fprintf(fid,"move forward\n");
-        fprintf(fid,"i = %d\n",i);
-        writematrix(path,'path.txt','Delimiter','tab')
-        fprintf(fid,"path =\n");
-        filetext = fileread('path.txt');
-        fprintf(fid,filetext);
+            fprintf(fid,"v is empty, enter loop %d\n",loop);
+            fprintf(fid,"move forward\n");
+            fprintf(fid,"i = %d\n",i);
+            writematrix(path,'path.txt','Delimiter','tab')
+            fprintf(fid,"path =\n");
+            filetext = fileread('path.txt');
+            fprintf(fid,filetext);
         end
         
-        c1 = find((~all(c_pairs>0)).*c_pairs(5,:));
+        c1 = find((c_pairs(d+1,:)>0).*(c_pairs(d+1,:)<d));
         c1 = c1(1);
         fa = find(path(1,:)==c1);
         fa = fa(1);
@@ -91,12 +91,12 @@ while i < ll+1
         path(:,n*d/2-(i-1-fa):n*d/2) = temp;
         
         if log
-        fprintf(fid,"move backward");
-        fprintf(fid,"c1 = %d\tfa = %d\n",c1,fa);
-        writematrix(path,'path.txt','Delimiter','tab')
-        fprintf(fid,"path =\n"); 
-        filetext = fileread('path.txt');
-        fprintf(fid,filetext);
+            fprintf(fid,"move backward");
+            fprintf(fid,"c1 = %d\tfa = %d\n",c1,fa);
+            writematrix(path,'path.txt','Delimiter','tab')
+            fprintf(fid,"path =\n");
+            filetext = fileread('path.txt');
+            fprintf(fid,filetext);
         end
         
         ll = n*d/2-(i-1-fa)-1;
@@ -105,8 +105,8 @@ while i < ll+1
         v = find(A(:,path(1,i)));
         
         if log
-        fprintf(fid,"i = %d\tl = %d\n",i,ll);
-        fprintf(fid,"v="+mat2str(v)+'\n');
+            fprintf(fid,"i = %d\tl = %d\n",i,ll);
+            fprintf(fid,"v="+mat2str(v)+'\n');
         end
     end
     
@@ -116,25 +116,24 @@ while i < ll+1
         path(2,i) = v;
     end
     
-    c_pairs(5,path(1,i)) = c_pairs(5,path(1,i)) + 1;
-    c_pairs(c_pairs(5,path(1,i)),path(1,i)) = path(2,i);
+    c_pairs(d+1,path(1,i)) = c_pairs(d+1,path(1,i)) + 1;
     
-    A(path(2,i),path(1,i)) = 0;    
+    A(path(2,i),path(1,i)) = 0;
     
     if log
-    writematrix(c_pairs,'c_pairs.txt','Delimiter','tab')
-    fprintf(fid,"c_pairs =\n"); 
-    filetext = fileread('c_pairs.txt');
-    fprintf(fid,filetext);
-    
-    writematrix(path,'path.txt','Delimiter','tab')
-    fprintf(fid,"path =\n"); 
-    filetext = fileread('path.txt');
-    fprintf(fid,filetext);
-    
-    writematrix(A,'A.txt','Delimiter','tab')
-    fprintf(fid,"A =\n"); filetext = fileread('A.txt');
-    fprintf(fid,filetext);
+        writematrix(c_pairs,'c_pairs.txt','Delimiter','tab')
+        fprintf(fid,"c_pairs =\n");
+        filetext = fileread('c_pairs.txt');
+        fprintf(fid,filetext);
+        
+        writematrix(path,'path.txt','Delimiter','tab')
+        fprintf(fid,"path =\n");
+        filetext = fileread('path.txt');
+        fprintf(fid,filetext);
+        
+        writematrix(A,'A.txt','Delimiter','tab')
+        fprintf(fid,"A =\n"); filetext = fileread('A.txt');
+        fprintf(fid,filetext);
     end
     %     plot([2,1],[path(1,i)-(n+1)/2,path(2,i)-(size(A,1)+1)/2],'b-')
     
@@ -145,44 +144,54 @@ while i < ll+1
     % Find connected constraint vertex
     path(1,i+1) = find(A(path(2,i),:));
     
-    c_pairs(5,path(1,i+1)) = c_pairs(5,path(1,i+1)) + 1;
-    c_pairs(c_pairs(5,path(1,i+1)),path(1,i+1)) = path(2,i);
+    c_pairs(d+1,path(1,i+1)) = c_pairs(d+1,path(1,i+1)) + 1;
     
     A(path(2,i),path(1,i+1)) = 0;
     
     if log
-    writematrix(path,'path.txt','Delimiter','tab')
-    fprintf(fid,"path =\n"); 
-    filetext = fileread('path.txt');
-    fprintf(fid,filetext);
-    
-    writematrix(c_pairs,'c_pairs.txt','Delimiter','tab')
-    fprintf(fid,"c_pairs =\n"); 
-    filetext = fileread('c_pairs.txt');
-    fprintf(fid,filetext);
-    
-    writematrix(A,'A.txt','Delimiter','tab')
-    fprintf(fid,"A =\n"); 
-    filetext = fileread('A.txt');
-    fprintf(fid,filetext);
+        writematrix(path,'path.txt','Delimiter','tab')
+        fprintf(fid,"path =\n");
+        filetext = fileread('path.txt');
+        fprintf(fid,filetext);
+        
+        writematrix(c_pairs,'c_pairs.txt','Delimiter','tab')
+        fprintf(fid,"c_pairs =\n");
+        filetext = fileread('c_pairs.txt');
+        fprintf(fid,filetext);
+        
+        writematrix(A,'A.txt','Delimiter','tab')
+        fprintf(fid,"A =\n");
+        filetext = fileread('A.txt');
+        fprintf(fid,filetext);
     end
     %     plot([2,1],[path(1,i+1)-(n+1)/2,path(2,i)-(size(A,1)+1)/2],'b-')
     
     i=i+1;
 end
 
-c_pairs(5,path(1,fa)) = c_pairs(5,path(1,fa))+1;
-c_pairs(c_pairs(5,path(1,fa)),path(1,fa)) = path(2,ll);
+c_pairs(d+1,path(1,fa)) = c_pairs(d+1,path(1,fa))+1;
+
+c_pairs(1,start) = path(2,1);
+c_pairs(d+1,start) = c_pairs(d+1,start) - 1;
+
+for i = 2:d*n/2
+    rows = d-c_pairs(d+1,path(1,i))+1:d-c_pairs(d+1,path(1,i))+2;
+    c_pairs(rows, path(1,i)) = path(2,i-1:i);
+    c_pairs(d+1,path(1,i)) = c_pairs(d+1,path(1,i))-2;
+end
+
+c_pairs(d,start) = path(2,n*d/2);
+c_pairs(d+1,start) = c_pairs(d+1,start) - 1;
 
 if log
-writematrix(c_pairs,'c_pairs.txt','Delimiter','tab')
-fprintf(fid,"c_pairs =\n"); 
-filetext = fileread('c_pairs.txt');
-fprintf(fid,filetext);
+    writematrix(c_pairs,'c_pairs.txt','Delimiter','tab')
+    fprintf(fid,"c_pairs =\n");
+    filetext = fileread('c_pairs.txt');
+    fprintf(fid,filetext);
 end
 
 if log
-fclose(fid);
+    fclose(fid);
 end
 
 end
