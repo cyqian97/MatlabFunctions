@@ -1,11 +1,19 @@
-function [params,imagePoints,estimationErrors] = calibMultiCheckerboard(im,boardSize,varargin)
-% detectMultiCheckerboard detects Multiple Checkerboards in One Image
+function [params,imagePoints,estimationErrors] = calibMultiCheckerboard(im,boardSize,options)
+% calibMultiCheckerboard detects Multiple Checkerboards in One Image
 % boardSize: (h,w). The size of the checkerboard, equals to the point array
 % size + (1,1).
-if ~isempty(varargin)
-    init_K = varargin{1};
-    validateattributes(init_K,'numeric',{'size',[3,3]})
+
+arguments
+    im {mustBeNumeric}
+    boardSize (1,2) double {mustBeInteger, mustBePositive}
+    options.init_K (3,3) {mustBeNumeric}
+    options.EstimateSkew (1,1) logical = false
+    options.NumRadialDistortionCoefficients (1,1) {mustBeInteger, mustBePositive} =  2
+    options.EstimateTangentialDistortion (1,1) = false
+
 end
+
+
 
 imagePoints = detectMultiCheckerboard(im,boardSize);
 
@@ -14,12 +22,18 @@ imagePoints = detectMultiCheckerboard(im,boardSize);
 squareSizeInMM = 22;
 worldPoints = generateCheckerboardPoints(boardSize,squareSizeInMM);
 imageSize = [size(im, 1),size(im, 2)];
-if ~isempty(varargin)
+if isfield(options,"init_K")
     [params, ~, estimationErrors] = estimateCameraParameters(imagePoints,worldPoints, ...
-        'ImageSize',imageSize,'WorldUnits','mm','InitialIntrinsicMatrix',init_K');
+        'ImageSize',imageSize,'WorldUnits','mm','InitialIntrinsicMatrix',options.init_K, ...
+        "EstimateSkew",options.EstimateSkew, ...
+        "NumRadialDistortionCoefficients",options.NumRadialDistortionCoefficients, ...
+        "EstimateTangentialDistortion",options.EstimateTangentialDistortion);
 else
     [params, ~, estimationErrors] = estimateCameraParameters(imagePoints,worldPoints, ...
-        'ImageSize',imageSize,'WorldUnits','mm');
+        'ImageSize',imageSize,'WorldUnits','mm', ...
+        "EstimateSkew",options.EstimateSkew, ...
+        "NumRadialDistortionCoefficients",options.NumRadialDistortionCoefficients, ...
+        "EstimateTangentialDistortion",options.EstimateTangentialDistortion);
 end
 
 end
